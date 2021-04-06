@@ -11,8 +11,8 @@ func TestReactNative(t *testing.T) {
 		Logger:   log.Default(),
 	}
 
-	info, found := version.isReactNative()
-	if !found {
+	info, err := version.isReactNative()
+	if err != nil {
 		t.Errorf("Path does not have a React Native / Expo app.")
 		return
 	}

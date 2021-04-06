@@ -1,12 +1,8 @@
 package version
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
-	"os"
-	"path"
 )
 
 type GetVersion struct {
@@ -14,12 +10,12 @@ type GetVersion struct {
 	Logger   *log.Logger
 }
 
-type verifyLanguage func(info *Info,  bool)
+type verifyLanguage func()(*Info,  error)
 
 
 func (v *GetVersion)Analyze() (*Info, error) {
 
-	infoFound := make([]Info, 0)
+	infoFound := make([]*Info, 0)
 
 	languages := []verifyLanguage {
 		v.isReactNative,
@@ -27,49 +23,21 @@ func (v *GetVersion)Analyze() (*Info, error) {
 		v.isMaven,
 	}
 
-	for i, language := range languages {
+	for _, language := range languages {
+		if info, _ := language(); info != nil {
+			infoFound = append(infoFound, info)
+		}
+	}
 
+	infoCount := len(infoFound)
+
+	if infoCount == 1 {
+		return infoFound[0], nil
+	}
+
+	if infoCount > 1 {
+		return nil, fmt.Errorf("multiple source codes declaration found at path: %s. Expected: 1, got: %d", v.RootPath, infoCount)
 	}
 
 	return nil, fmt.Errorf("no valid source code fount at path: %s", v.RootPath)
-}
-
-func (v *GetVersion) fullPathForFile(filename string) string {
-	return path.Join(v.RootPath, filename)
-}
-
-func (v *GetVersion) readJSONFile(fileName string) (string, map[string]interface{}, error) {
-
-	filePath, content, err := v.readFileContent(fileName)
-	if err != nil {
-		return filePath, nil, err
-	}
-
-	var packageJson map[string]interface{}
-	if err := json.Unmarshal(content, &packageJson); err != nil {
-		return filePath, nil, err
-	}
-	return filePath, packageJson, err
-}
-
-func (v *GetVersion) readFileContent(fileName string) (string, []byte, error) {
-	var err error
-
-	filePath := v.fullPathForFile(fileName)
-	if _, err = os.Stat(filePath); err != nil {
-		return filePath, nil, err
-	}
-
-	v.Logger.Printf("Found %s at %s", fileName, filePath)
-
-	var jsonFile *os.File
-	if jsonFile, err = os.Open(filePath); err != nil {
-		return filePath, nil, err
-	}
-
-	var content []byte
-	if content, err = ioutil.ReadAll(jsonFile); err != nil {
-		return filePath, nil, err
-	}
-	return filePath, content, err
 }

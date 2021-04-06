@@ -11,8 +11,8 @@ func TestMaven(t *testing.T) {
 		Logger:   log.Default(),
 	}
 
-	info, found := version.isMaven()
-	if !found {
+	info, err := version.isMaven()
+	if err != nil {
 		t.Errorf("Path does not have a Maven script.")
 		return
 	}

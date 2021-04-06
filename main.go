@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"get-module/version"
 	"github.com/urfave/cli/v2" // imports as package "cli"
 	"log"
@@ -11,6 +12,7 @@ import (
 func main() {
 
 	var path string
+	verbose := false
 
 	app := &cli.App{
 		Name: "get-version",
@@ -19,24 +21,37 @@ func main() {
 			&cli.StringFlag{
 				Name: "path",
 				Value: ".",
-				Usage: "root path of the source code to analyze",
+				Usage: "--path SOURCE_CODE_PATH",
+				Required: false,
 				Destination: &path,
+			},
+			&cli.BoolFlag{
+				Name:        "verbose",
+				Required:    false,
+				Hidden:      false,
+				Value:       false,
+				Destination: &verbose,
 			},
 		},
 		Action: func(c *cli.Context) error {
 			path = strings.TrimSpace(path)
 
-			version := version.GetVersion{
+			logger := log.Default()
+			if !verbose {
+				logger = nil
+			}
+
+			appVersion := version.GetVersion{
 				RootPath: path,
-				Logger: log.Default(),
+				Logger: logger,
 			}
 
-			var err error
-			if _, err = version.Analyze();  err != nil {
-
+			if info, err := appVersion.Analyze();  err == nil {
+				fmt.Print(info.Version)
+				return nil
+			} else {
+				return err
 			}
-
-			return err
 		},
 	}
 
