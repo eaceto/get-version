@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "sdkVersion": "26.0.0",
+    "scheme": "exampleapp",
+    "name": "example-app",
+    "version": "1.2.3",
+    "orientation": "portrait",
+    "slug": "example-app-rn",
+    "icon": "./assets/logo-1024.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#deff00"
+    },
+    "notification": {
+      "icon": "./assets/notification-48.png",
+      "color": "#deff00"
+    },
+    "android": {
+      "package": "com.example.test",
+      "versionCode": 1,
+      "permissions": []
+    }
+  }
+}
